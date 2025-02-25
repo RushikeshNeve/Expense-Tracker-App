@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../database";
+import { collection, getDocs, where } from "firebase/firestore";
+import { db , auth} from "../database";
 import { Card } from "react-bootstrap";
 
 const ExpenseForecast = () => {
@@ -9,7 +9,8 @@ const ExpenseForecast = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const querySnapshot = await getDocs(collection(db, "expenses"));
+      const user = auth.currentUser;
+      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
       const expenses = querySnapshot.docs.map(doc => doc.data());
 
       const monthlyExpenses = expenses.reduce((acc, expense) => {

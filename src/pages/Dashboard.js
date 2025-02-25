@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Container, CircularProgress, Card, CardContent, Typography, Box} from "@mui/material";
-import { db } from "../database";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../database";
+import { collection, getDocs, where } from "firebase/firestore";
 import StatCard from "../components/StatCard";
 import CategoryWiseExpense from "../charts/CategoryWiseExpense";
 import MonthlyExpenseTrend from "../charts/MonthlyExpenseTrend";
@@ -17,7 +17,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const expensesSnapshot = await getDocs(collection(db, "expenses"));
+        const user = auth.currentUser;
+        const expensesSnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));;
         const expenses = expensesSnapshot.docs.map((doc) => doc.data());
 
         setTotalExpenses(expenses.length ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0);

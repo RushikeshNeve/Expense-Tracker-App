@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../database";
-import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
+import { db, auth } from "../database";
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, where } from "firebase/firestore";
 import { FiEdit, FiTrash2, FiPlus, FiDownload, FiFilter } from "react-icons/fi";
 import { Button, IconButton, Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, Divider } from "@mui/material";
 import Modal from "./Modal";
@@ -23,7 +23,8 @@ const Home = () => {
   const [expenseToDelete, setExpenseToDelete] = useState(null);
 
   const fetchExpenses = async () => {
-    const q = query(collection(db, "expenses"), orderBy("createdAt", "desc"));
+    const user = auth.currentUser;
+    const q = query(collection(db, "expenses"), where("userId", "==", user.uid),orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
     const expenseList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setExpenses(expenseList);

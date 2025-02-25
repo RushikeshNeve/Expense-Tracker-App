@@ -21,8 +21,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../database";
+import { collection, getDocs, where } from "firebase/firestore";
+import { db, auth } from "../database";
 
 const SourceWiseExpense = () => {
   const currentYear = new Date().getFullYear();
@@ -35,7 +35,8 @@ const SourceWiseExpense = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const querySnapshot = await getDocs(collection(db, "expenses"));
+      const user = auth.currentUser;
+      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
       const expenses = querySnapshot.docs.map((doc) => doc.data());
 
       let filteredExpenses;

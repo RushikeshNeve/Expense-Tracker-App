@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { FormControl, Select, MenuItem, Typography, Box } from "@mui/material";
-import { db } from "../database";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../database";
+import { collection, getDocs, where} from "firebase/firestore";
 
 const MonthlyExpenseTrend = () => {
   const [data, setData] = useState([]);
@@ -11,7 +11,8 @@ const MonthlyExpenseTrend = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const querySnapshot = await getDocs(collection(db, "expenses"));
+      const user = auth.currentUser;
+      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
       const expenseData = {};
 
       querySnapshot.forEach((doc) => {

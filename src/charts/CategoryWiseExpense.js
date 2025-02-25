@@ -19,8 +19,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { db } from "../database";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../database";
+import { collection, getDocs, where } from "firebase/firestore";
 
 const CategoryWiseExpense = ({ hideAnalysisToggle = false }) => {
   const currentYear = new Date().getFullYear();
@@ -33,7 +33,8 @@ const CategoryWiseExpense = ({ hideAnalysisToggle = false }) => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const querySnapshot = await getDocs(collection(db, "expenses"));
+      const user = auth.currentUser;
+      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid),);
       let filteredExpenses;
 
       if (hideAnalysisToggle) {

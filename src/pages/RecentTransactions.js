@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
-import { db } from "../database";
+import { collection, getDocs, orderBy, limit, query, where } from "firebase/firestore";
+import { auth, db } from "../database";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from "@mui/material";
 
 const RecentTransactions = () => {
@@ -8,7 +8,8 @@ const RecentTransactions = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const q = query(collection(db, "expenses"), orderBy("createdAt", "desc"), limit(5));
+      const user = auth.currentUser;
+      const q = query(collection(db, "expenses"),  where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(5));
       const querySnapshot = await getDocs(q);
       const transactionsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setTransactions(transactionsData);

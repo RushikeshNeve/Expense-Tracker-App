@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card, CardContent, Typography, Box, FormControl, Select, MenuItem, ToggleButtonGroup, ToggleButton } from "@mui/material";
-import { db } from "../database";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../database";
+import { collection, getDocs, where } from "firebase/firestore";
 
 const WeeklySpendingTrend = () => {
   const [data, setData] = useState([]);
@@ -14,7 +14,8 @@ const WeeklySpendingTrend = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const querySnapshot = await getDocs(collection(db, "expenses"));
+      const user = auth.currentUser;
+      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
       const yearlyData = {};
 
       querySnapshot.forEach((doc) => {
