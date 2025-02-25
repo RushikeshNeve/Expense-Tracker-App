@@ -1,0 +1,31 @@
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .chart-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .legend-text {
+    font-size: 14px;
+  }
+  
+  .expense-report-container {
+    padding: 20px;
+  }
+  
+  h2 {
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
