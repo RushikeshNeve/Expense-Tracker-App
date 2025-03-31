@@ -10,18 +10,28 @@ const ExpenseForecast = () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       const user = auth.currentUser;
-      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
-      const expenses = querySnapshot.docs.map(doc => doc.data());
-
-      const monthlyExpenses = expenses.reduce((acc, expense) => {
-        const date = new Date(expense.createdAt.seconds * 1000);
-        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        acc[month] = (acc[month] || 0) + expense.amount;
-        return acc;
-      }, {});
-
-      setData(Object.keys(monthlyExpenses).map(month => ({ month, amount: monthlyExpenses[month] })));
+      if (!user) return; // Ensure user is authenticated before proceeding
+    
+      try {
+        // Querying expenses only for the current user
+        const expensesRef = collection(db, "expenses");
+        const q = query(expensesRef, where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        const expenses = querySnapshot.docs.map(doc => doc.data());
+    
+        const monthlyExpenses = expenses.reduce((acc, expense) => {
+          const date = new Date(expense.createdAt.seconds * 1000);
+          const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          acc[month] = (acc[month] || 0) + expense.amount;
+          return acc;
+        }, {});
+    
+        setData(Object.keys(monthlyExpenses).map(month => ({ month, amount: monthlyExpenses[month] })));
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+      }
     };
+    
 
     fetchExpenses();
   }, []);

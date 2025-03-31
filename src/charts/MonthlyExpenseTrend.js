@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { FormControl, Select, MenuItem, Typography, Box } from "@mui/material";
 import { db, auth } from "../database";
-import { collection, getDocs, where} from "firebase/firestore";
+import { collection, getDocs, where, query} from "firebase/firestore";
 
 const MonthlyExpenseTrend = () => {
   const [data, setData] = useState([]);
@@ -12,23 +12,32 @@ const MonthlyExpenseTrend = () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       const user = auth.currentUser;
-      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
-      const expenseData = {};
-
-      querySnapshot.forEach((doc) => {
-        const { amount, createdAt } = doc.data();
-        const date = new Date(createdAt.seconds * 1000);
-        const year = date.getFullYear();
-        const month = date.toLocaleString("default", { month: "short" });
-
-        if (!expenseData[year]) {
-          expenseData[year] = {};
-        }
-        expenseData[year][month] = (expenseData[year][month] || 0) + amount;
-      });
-
-      setYears(Object.keys(expenseData).map((year) => parseInt(year, 10)));
-      setData(expenseData);
+      if (!user) return; // Ensure user is authenticated before proceeding
+    
+      try {
+        // Querying expenses only for the current user
+        const expensesRef = collection(db, "expenses");
+        const q = query(expensesRef, where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        const expenseData = {};
+    
+        querySnapshot.forEach((doc) => {
+          const { amount, createdAt } = doc.data();
+          const date = new Date(createdAt.seconds * 1000);
+          const year = date.getFullYear();
+          const month = date.toLocaleString("default", { month: "short" });
+    
+          if (!expenseData[year]) {
+            expenseData[year] = {};
+          }
+          expenseData[year][month] = (expenseData[year][month] || 0) + amount;
+        });
+    
+        setYears(Object.keys(expenseData).map((year) => parseInt(year, 10)));
+        setData(expenseData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+      }
     };
 
     fetchExpenses();

@@ -20,7 +20,7 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import { db, auth } from "../database";
-import { collection, getDocs, where } from "firebase/firestore";
+import { collection, getDocs, where , query} from "firebase/firestore";
 
 const CategoryWiseExpense = ({ hideAnalysisToggle = false }) => {
   const currentYear = new Date().getFullYear();
@@ -34,41 +34,51 @@ const CategoryWiseExpense = ({ hideAnalysisToggle = false }) => {
   useEffect(() => {
     const fetchExpenses = async () => {
       const user = auth.currentUser;
-      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid),);
-      let filteredExpenses;
-
-      if (hideAnalysisToggle) {
-        // Fetch only current month's data when hideAnalysisToggle is true
-        filteredExpenses = querySnapshot.docs.filter((doc) => {
-          const expense = doc.data();
-          const date = new Date(expense.createdAt.seconds * 1000);
-          return date.getFullYear() === currentYear && date.getMonth() + 1 === currentMonth;
+      if (!user) return; // Ensure user is authenticated before proceeding
+    
+      try {
+        // Build query to fetch only the current user's expenses
+        const expensesRef = collection(db, "expenses");
+        const q = query(expensesRef, where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+    
+        let filteredExpenses;
+    
+        if (hideAnalysisToggle) {
+          // Fetch only current month's data when hideAnalysisToggle is true
+          filteredExpenses = querySnapshot.docs.filter((doc) => {
+            const expense = doc.data();
+            const date = new Date(expense.createdAt.seconds * 1000);
+            return date.getFullYear() === currentYear && date.getMonth() + 1 === currentMonth;
+          });
+        } else {
+          // Fetch based on selected filters
+          filteredExpenses = querySnapshot.docs.filter((doc) => {
+            const expense = doc.data();
+            const date = new Date(expense.createdAt.seconds * 1000);
+            if (analysisType === "monthly") {
+              return date.getFullYear() === year && date.getMonth() + 1 === month;
+            } else {
+              return date.getFullYear() === year;
+            }
+          });
+        }
+    
+        const categoryMap = {};
+        filteredExpenses.forEach((doc) => {
+          const { category, amount } = doc.data();
+          categoryMap[category] = (categoryMap[category] || 0) + amount;
         });
-      } else {
-        // Fetch based on selected filters
-        filteredExpenses = querySnapshot.docs.filter((doc) => {
-          const expense = doc.data();
-          const date = new Date(expense.createdAt.seconds * 1000);
-          if (analysisType === "monthly") {
-            return date.getFullYear() === year && date.getMonth() + 1 === month;
-          } else {
-            return date.getFullYear() === year;
-          }
-        });
+    
+        setData(
+          Object.keys(categoryMap).map((key) => ({
+            name: key,
+            value: categoryMap[key],
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
       }
-
-      const categoryMap = {};
-      filteredExpenses.forEach((doc) => {
-        const { category, amount } = doc.data();
-        categoryMap[category] = (categoryMap[category] || 0) + amount;
-      });
-
-      setData(
-        Object.keys(categoryMap).map((key) => ({
-          name: key,
-          value: categoryMap[key],
-        }))
-      );
     };
 
     fetchExpenses();

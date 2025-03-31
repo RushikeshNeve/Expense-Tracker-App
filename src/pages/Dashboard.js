@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Container, CircularProgress, Card, CardContent, Typography, Box} from "@mui/material";
 import { db, auth } from "../database";
-import { collection, getDocs, where } from "firebase/firestore";
+import { collection, getDocs, where, query }from "firebase/firestore";
 import StatCard from "../components/StatCard";
 import CategoryWiseExpense from "../charts/CategoryWiseExpense";
 import MonthlyExpenseTrend from "../charts/MonthlyExpenseTrend";
@@ -18,13 +18,24 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const user = auth.currentUser;
-        const expensesSnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));;
+        if (!user) return;
+        console.log(user)
+        // Fetching expenses only for the current user
+        const expensesRef = collection(db, "expenses");
+        const q = query(expensesRef, where("userId", "==", user.uid));
+        const expensesSnapshot = await getDocs(q);
+  
         const expenses = expensesSnapshot.docs.map((doc) => doc.data());
-
+        console.log(expenses);
+  
         setTotalExpenses(expenses.length ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0);
         setNumExpenses(expenses.length || 0);
-
-        const categoriesSnapshot = await getDocs(collection(db, "categories"));
+  
+        // Fetching categories for the current user
+        const categoriesRef = collection(db, "categories");
+        const categoriesQuery = query(categoriesRef);
+        const categoriesSnapshot = await getDocs(categoriesQuery);
+  
         setTotalCategories(categoriesSnapshot.size || 0);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -32,7 +43,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
 

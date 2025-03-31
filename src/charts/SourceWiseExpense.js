@@ -21,7 +21,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { collection, getDocs, where } from "firebase/firestore";
+import { collection, getDocs, where, query } from "firebase/firestore";
 import { db, auth } from "../database";
 
 const SourceWiseExpense = () => {
@@ -36,40 +36,50 @@ const SourceWiseExpense = () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       const user = auth.currentUser;
-      const querySnapshot = await getDocs(collection(db, "expenses"), where("userId", "==", user.uid));
-      const expenses = querySnapshot.docs.map((doc) => doc.data());
-
-      let filteredExpenses;
-
-      if (analysisType === "monthly") {
-        filteredExpenses = expenses.filter((expense) => {
-          const date = new Date(expense.createdAt.seconds * 1000);
-          return date.getFullYear() === year && date.getMonth() + 1 === month;
-        });
-      } else {
-        // Yearly Analysis: Show data for the entire selected year
-        filteredExpenses = expenses.filter((expense) => {
-          const date = new Date(expense.createdAt.seconds * 1000);
-          return date.getFullYear() === year;
-        });
+      if (!user) return; // Ensure user is authenticated before proceeding
+    
+      try {
+        // Querying expenses only for the current user
+        const expensesRef = collection(db, "expenses");
+        const q = query(expensesRef, where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        const expenses = querySnapshot.docs.map((doc) => doc.data());
+    
+        let filteredExpenses;
+    
+        if (analysisType === "monthly") {
+          filteredExpenses = expenses.filter((expense) => {
+            const date = new Date(expense.createdAt.seconds * 1000);
+            return date.getFullYear() === year && date.getMonth() + 1 === month;
+          });
+        } else {
+          // Yearly Analysis: Show data for the entire selected year
+          filteredExpenses = expenses.filter((expense) => {
+            const date = new Date(expense.createdAt.seconds * 1000);
+            return date.getFullYear() === year;
+          });
+        }
+    
+        // Group expenses by source
+        const groupedData = filteredExpenses.reduce((acc, expense) => {
+          const source = expense.source || "Unknown";
+          if (!acc[source]) acc[source] = 0;
+          acc[source] += expense.amount;
+          return acc;
+        }, {});
+    
+        // Convert to array format for Recharts
+        const formattedData = Object.keys(groupedData).map((source) => ({
+          source,
+          amount: groupedData[source],
+        }));
+    
+        setData(formattedData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
       }
-
-      // Group expenses by source
-      const groupedData = filteredExpenses.reduce((acc, expense) => {
-        const source = expense.source || "Unknown";
-        if (!acc[source]) acc[source] = 0;
-        acc[source] += expense.amount;
-        return acc;
-      }, {});
-
-      // Convert to array format for Recharts
-      const formattedData = Object.keys(groupedData).map((source) => ({
-        source,
-        amount: groupedData[source],
-      }));
-
-      setData(formattedData);
     };
+    
 
     fetchExpenses();
   }, [year, month, analysisType]); // Re-run when year, month, or toggle changes

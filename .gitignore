@@ -1,0 +1,72 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+.pnp
+.pnp.js
+
+# Firebase credentials
+firebaseConfig.js
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase cache files
+firebase-debug.log
+
+# Build directories
+build/
+dist/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Editor Directories and Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing files
+coverage/
+
+# Firebase files
+firebase-debug.log
+.firebaserc
+
+# React related files
+*.lock
+public/static/
+public/favicon.ico
+
+# Production build
+build/
+
+# Generated files
+yarn-error.log
+yarn-debug.log
+npm-debug.log
+
+# Temporary files
+temp/
+tmp/
+
+# Ignore ESLint cache
+.eslintcache
+
+# Ignore testing coverage
+coverage/

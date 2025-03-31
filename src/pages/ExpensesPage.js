@@ -36,6 +36,7 @@ const Home = () => {
 
   const handleUpdateExpense = async (updatedExpense) => {
     await updateDoc(doc(db, "expenses", updatedExpense.id), updatedExpense);
+    setShowModal(false)
     setExpenses((prev) => prev.map((exp) => (exp.id === updatedExpense.id ? updatedExpense : exp)));
     setFilteredExpenses((prev) => prev.map((exp) => (exp.id === updatedExpense.id ? updatedExpense : exp)));
   };
@@ -74,6 +75,11 @@ const Home = () => {
       fetchExpenses(); // Refresh data after deletion
     }
   };
+
+  const handleAddExpenseDrawerClose = async () => {
+    setShowDrawer(false)
+    fetchExpenses()
+  }
 
   return (
     <Box sx={{ p: 4 }}>
@@ -149,7 +155,7 @@ const Home = () => {
 
       {/* Components */}
       <FilterDrawer open={showFilterDrawer} onClose={() => setShowFilterDrawer(false)} filter={filter} setFilter={setFilter} applyFilters={applyFilters} resetFilters={resetFilters} />
-      <AddExpenseDrawer isOpen={showDrawer} onClose={() => setShowDrawer(false)} />
+      <AddExpenseDrawer isOpen={showDrawer} onClose={handleAddExpenseDrawerClose} />
       <ExportToExcel filteredExpenses={filteredExpenses} show={showExportModal} onClose={() => setShowExportModal(false)} />
       {showModal && <Modal expense={editExpense} onClose={() => setShowModal(false)} onSave={handleUpdateExpense} />}
       <ConfirmationModal open={showConfirmModal} onClose={() => setShowConfirmModal(false)} onConfirm={handleDeleteExpense} />
