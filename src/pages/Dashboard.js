@@ -28,7 +28,7 @@ const Dashboard = () => {
         const expenses = expensesSnapshot.docs.map((doc) => doc.data());
         console.log(expenses);
   
-        setTotalExpenses(expenses.length ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0);
+        setTotalExpenses(expenses.length ? expenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2) : 0);
         setNumExpenses(expenses.length || 0);
   
         // Fetching categories for the current user

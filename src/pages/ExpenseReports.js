@@ -1,16 +1,20 @@
 import React from "react";
-import { Container, Grid, Paper, Typography, Box } from "@mui/material";
+import { Container, Grid, Paper, Typography, Box, useMediaQuery } from "@mui/material";
 import CategoryWiseExpense from "../charts/CategoryWiseExpense";
 import MonthlyExpenseTrend from "../charts/MonthlyExpenseTrend";
 import WeeklySpendingTrend from "../charts/WeeklySpendingTrend";
 import SourceWiseExpense from "../charts/SourceWiseExpense";
 import TabComponent from "../components/Tabs";
+import { useTheme } from "@mui/material/styles";
 
 const ExpenseReport = () => {
-  return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Detects screens smaller than 600px (Mobile devices)
 
+  return (
+    <Container maxWidth="xl" sx={{ py: isMobile ? 2 : 4, px: isMobile ? 1 : 3 }}>
       <TabComponent activeTab="reports"/>
+      
       {/* Header Section with Gradient */}
       <Box
         sx={{
@@ -23,18 +27,18 @@ const ExpenseReport = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h4" fontWeight="bold">
+        <Typography variant={isMobile ? "h5" : "h4"} fontWeight="bold">
           Expense Report
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={isMobile ? 2 : 3}>
         {/* Category-wise Expense */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={3}
             sx={{
-              p: 3,
+              p: isMobile ? 2 : 3,
               borderRadius: 3,
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
             }}
@@ -47,11 +51,11 @@ const ExpenseReport = () => {
         </Grid>
 
         {/* Monthly Expense Trend */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={3}
             sx={{
-              p: 3,
+              p: isMobile ? 2 : 3,
               borderRadius: 3,
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
             }}
@@ -64,11 +68,11 @@ const ExpenseReport = () => {
         </Grid>
 
         {/* Weekly Spending Trend */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={3}
             sx={{
-              p: 3,
+              p: isMobile ? 2 : 3,
               borderRadius: 3,
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
             }}
@@ -81,11 +85,11 @@ const ExpenseReport = () => {
         </Grid>
 
         {/* Source-wise Expense Breakdown */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={3}
             sx={{
-              p: 3,
+              p: isMobile ? 2 : 3,
               borderRadius: 3,
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
             }}
