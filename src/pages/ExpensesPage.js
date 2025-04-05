@@ -3,6 +3,7 @@ import { db, auth } from "../database";
 import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, where } from "firebase/firestore";
 import { FiEdit, FiTrash2, FiPlus, FiDownload, FiFilter } from "react-icons/fi";
 import { Button, IconButton, Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, Divider } from "@mui/material";
+import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import Modal from "./Modal";
 import AddExpenseDrawer from "./AddExpense";
 import ExportToExcel from "./ExportToExcel";
@@ -129,7 +130,22 @@ const Home = () => {
                 <TableRow key={expense.id}>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell>{expense.description || "No Description"}</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "green" }}>₹{expense.amount}</TableCell>
+                  <TableCell
+          sx={{
+            fontWeight: "bold",
+            color: expense.amount < 0 ? "green" : "red",
+          }}
+        >
+          {expense.amount < 0 ? (
+            <>
+              <ArrowDownward fontSize="small" /> ₹{Math.abs(expense.amount)}
+            </>
+          ) : (
+            <>
+              <ArrowUpward fontSize="small" /> ₹{expense.amount}
+            </>
+          )}
+        </TableCell>
                   <TableCell>{expense.source || "N/A"}</TableCell>
                   <TableCell>{new Date(expense.createdAt.seconds * 1000).toISOString().split("T")[0]}</TableCell>
                   <TableCell>
